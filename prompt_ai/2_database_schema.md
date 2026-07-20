@@ -1,7 +1,7 @@
 # Database Schema & Relations
 
 ## 1. Skema Tabel (DDL)
-Agent wajib menggunakan struktur tabel berikut tanpa mengubah nama kolom:
+Agent WAJIB menggunakan struktur tabel berikut. Perhatikan bahwa kita menggunakan MyISAM dan tidak menggunakan Foreign Key fisik sama sekali:
 
 ```sql
 CREATE TABLE user (
@@ -10,14 +10,14 @@ CREATE TABLE user (
     password VARCHAR(255) NOT NULL,
     nama_petugas VARCHAR(100) NOT NULL,
     role ENUM('admin', 'kasir') DEFAULT 'kasir'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE barang (
     id_barang INT AUTO_INCREMENT PRIMARY KEY,
     nama_barang VARCHAR(150) NOT NULL,
     harga INT NOT NULL,
     stok INT DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE kwitansi (
     no_kwitansi VARCHAR(20) PRIMARY KEY,
@@ -25,8 +25,8 @@ CREATE TABLE kwitansi (
     nama_pasien VARCHAR(100) NOT NULL,
     total_bayar INT DEFAULT 0,
     id_user INT,
-    FOREIGN KEY (id_user) REFERENCES user(id_user)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    INDEX idx_user (id_user) -- Pengganti Foreign Key
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE detail_kwitansi (
     id_detail INT AUTO_INCREMENT PRIMARY KEY,
@@ -34,12 +34,6 @@ CREATE TABLE detail_kwitansi (
     id_barang INT,
     jumlah INT NOT NULL,
     subtotal INT NOT NULL,
-    FOREIGN KEY (no_kwitansi) REFERENCES kwitansi(no_kwitansi) ON DELETE CASCADE,
-    FOREIGN KEY (id_barang) REFERENCES barang(id_barang)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-```
-
-## 2. Aturan Relasi Bisnis
-- Satu kwitansi (`kwitansi`) diinput oleh satu user (`id_user`).
-- Satu kwitansi memiliki banyak item di `detail_kwitansi` melalui relasi `no_kwitansi`.
-- Penghapusan data kwitansi (`ON DELETE CASCADE`) otomatis menghapus baris detailnya.
+    INDEX idx_kwitansi (no_kwitansi), -- Pengganti Foreign Key
+    INDEX idx_barang (id_barang)      -- Pengganti Foreign Key
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;

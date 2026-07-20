@@ -1,20 +1,27 @@
 <?php
-require_once __DIR__ . '/app_common.php';
-
+// api_cari_barang.php
 header('Content-Type: application/json');
+require_once 'koneksi.php';
 
-$db = connectDb();
-$keyword = trim(isset($_GET['keyword']) ? $_GET['keyword'] : '');
-
-if ($keyword === '') {
-    $stmt = $db->prepare('SELECT id_barang, nama_barang, harga, stok FROM barang ORDER BY nama_barang ASC LIMIT 10');
-    $stmt->execute();
-    $rows = $stmt->fetchAll();
+if (isset($_GET['keyword'])) {
+    $keyword = '%' . $_GET['keyword'] . '%';
+    
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM barang WHERE nama_barang LIKE :keyword LIMIT 10");
+        $stmt->execute(array(':keyword' => $keyword));
+        $data = $stmt->fetchAll();
+        
+        echo json_encode(array(
+            "status" => "success",
+            "data" => $data
+        ));
+    } catch (PDOException $e) {
+        echo json_encode(array(
+            "status" => "error",
+            "message" => "Database error: " . $e->getMessage()
+        ));
+    }
 } else {
-    $like = '%' . $keyword . '%';
-    $stmt = $db->prepare('SELECT id_barang, nama_barang, harga, stok FROM barang WHERE nama_barang LIKE ? ORDER BY nama_barang ASC LIMIT 10');
-    $stmt->execute(array($like));
-    $rows = $stmt->fetchAll();
+    echo json_encode(array("status" => "error", "message" => "Parameter keyword tidak ada"));
 }
-
-echo json_encode(array('status' => 'success', 'data' => $rows));
+?>

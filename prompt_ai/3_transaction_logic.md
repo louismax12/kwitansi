@@ -1,13 +1,20 @@
+#### Revisi File 3: Transaction & Business Logic Requirements
+```markdown
 # Transaction & Business Logic Requirements (MyISAM & PHP 5.4 Compatible)
 
 ## 1. Mekanisme Generate Nomor Kwitansi
-Nomor kwitansi harus digenerate otomatis dengan format: `KW-YYYYMMDD-[4 Digit Urut]`.
-Contoh: `KW-20260718-0001`. Agent harus membuat query untuk mengecek counter terakhir pada hari berjalan menggunakan klausa `LIKE`.
+Nomor kwitansi harus digenerate otomatis dengan format: `KW-YYYYMMDD-[4 Digit Urut]` (Contoh: `KW-20260718-0001`). 
+Agent harus membuat query untuk mencari nilai `MAX(RIGHT(no_kwitansi, 4))` pada hari berjalan menggunakan klausa `LIKE`.
 
-## 2. Alur Simpan Transaksi (Manual Rollback Logic untuk MyISAM)
-Karena engine MyISAM tidak mendukung `$pdo->beginTransaction()`, proses pengamanan data jika terjadi gagal simpan/stok habis wajib ditangani manual secara prosedural di PHP:
+## 2. Alur Simpan Transaksi & Kunci Tabel (Pessimistic Locking)
+Karena engine MyISAM tidak mendukung `$pdo->beginTransaction()`, Anda WAJIB menerapkan alur berikut secara kaku di PHP:
 
-1. **Langkah 1 (Validasi Awal)**: Sebelum melakukan INSERT apa pun, lakukan looping pada item yang dikirim dari frontend. Cek satu per satu ke tabel `barang` apakah `stok >= jumlah_beli`. Jika ada satu saja barang yang stoknya kurang, hentikan proses dan langsung kembalikan respon error ke kasir.
-2. **Langkah 2**: Jika semua stok aman, lakukan `INSERT` data utama ke tabel `kwitansi`.
-3. **Langkah 3**: Lakukan looping kedua untuk melakukan `INSERT` ke tabel `detail_kwitansi` sekaligus lakukan `UPDATE` ke tabel `barang` untuk memotong stok (`stok = stok - jumlah_beli`).
-4. **Catatan Kegagalan**: Karena tidak ada rollback otomatis di MyISAM, pastikan validasi stok di Langkah 1 benar-benar ketat untuk menghindari data menggantung (*corrupted data*).
+1. **Table Locking (Wajib):** Eksekusi perintah SQL `LOCK TABLES barang WRITE, kwitansi WRITE, detail_kwitansi WRITE;` sebelum melakukan apa pun.
+2. **Pre-Check Stok:** Lakukan looping untuk mengecek `stok` di tabel `barang`. Jika ada 1 saja stok yang kurang, langsung lompat ke Langkah 5 (Unlock & lempar error).
+3. **Eksekusi Insert & Update:** 
+   - `INSERT` data ke tabel `kwitansi`.
+   - Looping untuk `INSERT` ke `detail_kwitansi` sekaligus `UPDATE` stok `barang` (`stok = stok - jumlah`).
+4. **Compensating Transaction (Manual Rollback):** Gunakan blok `try...catch`. Jika terjadi Exception/Error di tengah eksekusi langkah 3, blok `catch` WAJIB berisi eksekusi manual untuk: 
+   - Melakukan `UPDATE` penambahan stok kembali (hanya untuk barang yang terlanjur dipotong).
+   - Melakukan `DELETE` pada tabel `kwitansi` dan `detail_kwitansi` yang terlanjur masuk.
+5. **Release Lock:** Eksekusi `UNLOCK TABLES;` secara mutlak pada akhir blok sukses, MAUPUN di dalam blok `catch` setelah pembersihan kompensasi selesai.
