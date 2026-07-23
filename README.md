@@ -60,7 +60,7 @@ Project ini terdiri dari beberapa bagian utama:
 
 ## 🛠️ Teknologi yang Digunakan
 - PHP
-- MySQL / MariaDB
+- MySQL
 - HTML, CSS, dan JavaScript
 - Struktur web sederhana untuk sistem kasir dan invoice
 
