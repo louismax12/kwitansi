@@ -20,10 +20,8 @@ class PelangganModel {
     }
 
     public function getById($id) {
-        $stmt = $this->conn->prepare("SELECT * FROM pelanggan WHERE id_pelanggan = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        $id_safe = intval($id);
+        $result = $this->conn->query("SELECT * FROM pelanggan WHERE id_pelanggan = $id_safe");
+        return $result ? $result->fetch_assoc() : null;
     }
 }

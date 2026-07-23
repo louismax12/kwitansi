@@ -20,10 +20,8 @@ class BarangModel {
     }
 
     public function getById($id) {
-        $stmt = $this->conn->prepare("SELECT * FROM barang WHERE id_barang = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        $id_safe = intval($id);
+        $result = $this->conn->query("SELECT * FROM barang WHERE id_barang = $id_safe");
+        return $result ? $result->fetch_assoc() : null;
     }
 }

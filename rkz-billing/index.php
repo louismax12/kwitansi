@@ -1,6 +1,9 @@
 <?php
 // index.php
 // Simple Front Controller
+date_default_timezone_set('Asia/Jakarta');
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+ini_set('display_errors', 0);
 
 // Include configuration
 require_once __DIR__ . '/config/database.php';

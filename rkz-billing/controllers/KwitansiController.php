@@ -90,22 +90,21 @@ class KwitansiController {
             die("ID Kwitansi tidak valid.");
         }
 
-        $stmt = $this->conn->prepare("SELECT * FROM kwitansi WHERE no_kwitansi = ?");
-        $stmt->bind_param("s", $no_kwitansi);
-        $stmt->execute();
-        $kwitansi = $stmt->get_result()->fetch_assoc();
+        $no_kwitansi_safe = $this->conn->real_escape_string($no_kwitansi);
+        
+        $res = $this->conn->query("SELECT * FROM kwitansi WHERE no_kwitansi = '$no_kwitansi_safe'");
+        $kwitansi = $res ? $res->fetch_assoc() : null;
 
         if (!$kwitansi) {
             die("Kwitansi tidak ditemukan.");
         }
 
-        $stmt = $this->conn->prepare("SELECT d.*, b.nama_barang, b.harga FROM detail_kwitansi d JOIN barang b ON d.id_barang = b.id_barang WHERE d.no_kwitansi = ?");
-        $stmt->bind_param("s", $no_kwitansi);
-        $stmt->execute();
-        $itemsResult = $stmt->get_result();
+        $resItems = $this->conn->query("SELECT d.*, b.nama_barang, b.harga FROM detail_kwitansi d JOIN barang b ON d.id_barang = b.id_barang WHERE d.no_kwitansi = '$no_kwitansi_safe'");
         $items = array();
-        while ($row = $itemsResult->fetch_assoc()) {
-            $items[] = $row;
+        if ($resItems) {
+            while ($row = $resItems->fetch_assoc()) {
+                $items[] = $row;
+            }
         }
 
         $content = __DIR__ . '/../views/kwitansi/view.php';
