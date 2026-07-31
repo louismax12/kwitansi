@@ -107,6 +107,14 @@ class KwitansiController {
             }
         }
 
+        // Fetch User
+        $id_user = isset($kwitansi['id_user']) ? intval($kwitansi['id_user']) : 1;
+        $resUser = $this->conn->query("SELECT username FROM users LIMIT 1");
+        $kwitansi['nama_user'] = 'Admin';
+        if ($resUser && $rowUser = $resUser->fetch_assoc()) {
+            $kwitansi['nama_user'] = $rowUser['username'];
+        }
+
         $content = __DIR__ . '/../views/kwitansi/view.php';
         require_once __DIR__ . '/../views/layout.php';
     }

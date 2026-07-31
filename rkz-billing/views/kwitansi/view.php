@@ -16,6 +16,14 @@ function terbilang($x) {
     elseif ($x < 1000000000) return terbilang($x / 1000000) . " juta" . terbilang($x % 1000000);
 }
 $terbilang_rupiah = ucwords(trim(terbilang($kwitansi['total_bayar']))) . " Rupiah";
+
+// Format Tanggal Indonesia
+$bulan_indo = [
+    1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+$ts = strtotime($kwitansi['tanggal_transaksi']);
+$tanggal_indo = date('d', $ts) . ' ' . $bulan_indo[(int)date('m', $ts)] . ' ' . date('Y', $ts);
 ?>
 
 <!-- Tampilan UI Normal (Web) -->
@@ -38,7 +46,7 @@ $terbilang_rupiah = ucwords(trim(terbilang($kwitansi['total_bayar']))) . " Rupia
             </ol>
         </div>
         <p><strong>Pasien:</strong> <?php echo htmlspecialchars($kwitansi['nama_pasien']); ?></p>
-        <p><strong>Total:</strong> Rp <?php echo number_format($kwitansi['total_bayar'], 0, ',', '.'); ?></p>
+        <p><strong>Total:</strong> Rp <?php echo number_format($kwitansi['total_bayar'], 0, ',', '.'); ?>,-</p>
         <p><strong>Terbilang:</strong> <?php echo $terbilang_rupiah; ?></p>
         
         <h5>Detail Item:</h5>
@@ -70,8 +78,9 @@ $terbilang_rupiah = ucwords(trim(terbilang($kwitansi['total_bayar']))) . " Rupia
         ?>
     </div>
     
-    <div class="field-jumlah-rp">Rp <?php echo number_format($kwitansi['total_bayar'], 0, ',', '.'); ?></div>
-    <div class="field-tanggal-surabaya"><?php echo date('d M Y', strtotime($kwitansi['tanggal_transaksi'])); ?></div>
+    <div class="field-jumlah-rp">Rp <?php echo number_format($kwitansi['total_bayar'], 0, ',', '.'); ?>,-</div>
+    <div class="field-tanggal-surabaya"><?php echo $tanggal_indo; ?></div>
+    <div class="field-nama-user">(<?php echo htmlspecialchars($kwitansi['nama_user']); ?>)</div>
 </div>
 
 <style>
@@ -95,8 +104,8 @@ $terbilang_rupiah = ucwords(trim(terbilang($kwitansi['total_bayar']))) . " Rupia
             background-color: white;
             margin: 0;
             padding: 0;
-            font-family: 'Courier New', Courier, monospace; 
-            font-size: 15px;
+            font-family: 'Arial', Courier, monospace; 
+            font-size: 24px;
             color: #000;
         }
 
@@ -115,51 +124,56 @@ $terbilang_rupiah = ucwords(trim(terbilang($kwitansi['total_bayar']))) . " Rupia
 
         .field-no-kuitansi {
             position: absolute;
-            top: 1.2cm;          /* "No. Kuitansi" ada di paruh atas blok 3cm */
-            left: 18.0cm;        /* 24cm - 1.3cm - 5.8cm (lebar blok) + margin untuk melewati titik dua */
-            width: 5.5cm;
-            font-weight: bold;
+            top: 1.3cm;
+            left: 14.8cm; 
+            width: 6.5cm;
+            font-size:23px;
         }
 
         .field-terima-dari {
             position: absolute;
-            top: 4.8cm;          /* 3.0cm (batas atas) + 1.9cm (jarak) = 4.9cm */
-            left: 6.0cm;         /* 1.3cm (margin kiri) + 4.3cm (label) = 5.6cm, kita taruh di 6.0cm */
+            top: 6.6cm; 
+            left: -2.3cm; 
             width: 17cm;
-            font-weight: bold;
         }
 
         .field-uang-sejumlah {
             position: absolute;
-            top: 5.8cm;          /* Di bawah Telah terima dari */
-            left: 6.0cm;
-            width: 17cm;
-            line-height: 1.5;
+            top: 7.8cm; 
+            left: -2.3cm; 
+            width: 25cm;
+            line-height: 0.95; /* Sangat rapat agar jika 2 baris tidak menabrak baris bawahnya */
+            font-size: 26px; 
             font-style: italic;
-            font-weight: bold;
         }
 
         .field-untuk-pembayaran {
             position: absolute;
-            top: 7.2cm;          
-            left: 6.0cm;
+            top: 9.8cm; 
+            left: -2.3cm; 
             width: 17cm;
-            line-height: 1.2;
+            line-height: 1.5; /* Dipersempit agar kalau 2 baris tidak menabrak bawahnya */
+            font-size: 26px; /* Diperkecil agar nominal panjang bisa muat */
+            font-style: italic;
         }
 
         .field-jumlah-rp {
             position: absolute;
-            top: 11.2cm;         /* 13.9cm (total tinggi) - 2.3cm (jarak dari bawah) = 11.6cm */
-            left: 5.5cm;         
-            font-weight: bold;
-            font-size: 18px;
+            top: 15.4cm; 
+            left: -2.3cm; 
+            font-size: 27px;
         }
 
         .field-tanggal-surabaya {
             position: absolute;
-            top: 9.7cm;          /* 13.9cm (total tinggi) - 4.0cm (jarak dari bawah) = 9.9cm */
-            left: 17.5cm;        /* Sebelah tulisan "Surabaya, " */
-            font-weight: bold;
+            top: 12.6cm; 
+            left: 14.5cm; 
+        }
+
+        .field-nama-user {
+            position: absolute;
+            top: 16.6cm; 
+            left: 14.5cm; 
         }
     }
 </style>
