@@ -32,4 +32,17 @@ class BarangController {
         $content = __DIR__ . '/../views/barang/index.php';
         require_once __DIR__ . '/../views/layout.php';
     }
+
+    public function addStock() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_barang']) && isset($_POST['stok_masuk'])) {
+            $id_barang = intval($_POST['id_barang']);
+            $stok_masuk = intval($_POST['stok_masuk']);
+            
+            $stmt = $this->conn->prepare("UPDATE kwitansi_kode_barang SET stok = stok + ? WHERE id_barang = ?");
+            $stmt->bind_param("ii", $stok_masuk, $id_barang);
+            $stmt->execute();
+        }
+        header("Location: index.php?c=barang");
+        exit;
+    }
 }

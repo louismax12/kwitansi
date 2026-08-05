@@ -1,0 +1,307 @@
+-- --------------------------------------------------------
+-- Host: 192.168.2.12
+-- Server version: 10.11.14-MariaDB-0ubuntu0.24.04.1 - Ubuntu 24.04
+-- Server OS:                    debian-linux-gnu
+-- HeidiSQL Version: 12.19.0.7314
+-- --------------------------------------------------------
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+
+-- Dumping database structure for keuangan
+CREATE DATABASE IF NOT EXISTS `keuangan` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
+USE `keuangan`;
+
+-- Dumping structure for table keuangan.kwitansi_brg
+CREATE TABLE IF NOT EXISTS `kwitansi_brg` (
+  `kd_brg` int(11) NOT NULL,
+  `nm_brg` varchar(50) NOT NULL,
+  PRIMARY KEY (`kd_brg`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table keuangan.kwitansi_brg: 16 rows
+INSERT INTO `kwitansi_brg` (`kd_brg`, `nm_brg`) VALUES
+	(1, 'LABORAT'),
+	(2, 'ECG'),
+	(3, 'RONTGEN'),
+	(4, 'USG'),
+	(5, 'CT SCAN'),
+	(6, 'TREADMIL'),
+	(7, 'POLI KLINIK'),
+	(8, 'POLI SPESIALIS'),
+	(9, 'POLI GIGI'),
+	(10, 'GIGI PALSU'),
+	(11, 'FISIOTERAPI'),
+	(12, 'BEDAH'),
+	(13, 'FARMASI'),
+	(14, 'UGD'),
+	(15, 'TU'),
+	(16, 'DOKTER');
+
+-- Dumping structure for table keuangan.kwitansi_cetak
+CREATE TABLE IF NOT EXISTS `kwitansi_cetak` (
+  `no_kwitansi` varchar(20) NOT NULL,
+  `no_faktur` varchar(50) DEFAULT NULL,
+  `tanggal_transaksi` datetime DEFAULT current_timestamp(),
+  `id_pelanggan` int(11) DEFAULT NULL,
+  `nama_pasien` varchar(100) NOT NULL,
+  `total_bayar` int(11) DEFAULT 0,
+  `untuk_pembayaran` varchar(255) DEFAULT NULL,
+  `id_user` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`no_kwitansi`),
+  KEY `idx_user` (`id_user`),
+  KEY `idx_pelanggan` (`id_pelanggan`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table keuangan.kwitansi_cetak: 7 rows
+INSERT INTO `kwitansi_cetak` (`no_kwitansi`, `no_faktur`, `tanggal_transaksi`, `id_pelanggan`, `nama_pasien`, `total_bayar`, `untuk_pembayaran`, `id_user`) VALUES
+	('INV-20260723-1598', NULL, '2026-07-23 04: 28: 36',
+2, 'Ny. Siti Aminah',
+85000, NULL, '1'),
+	('INV-20260724-1599', NULL, '2026-07-31 08: 22: 55',
+2, 'Xavier',
+899999999, NULL, '1'),
+	('INV-20260731-5226', NULL, '2026-07-31 15: 08: 14',
+1, 'Tn. Budi Santoso',
+88000, NULL, 'MSI'),
+	('INV-20260731-5593', NULL, '2026-07-31 12: 48: 53',
+2, 'Ny. Siti Aminah',
+491000, NULL, '1'),
+	('INV-20260805-1547', NULL, '2026-08-05 10: 40: 47',
+4, 'Ny. Suharti',
+1000000, NULL, 'MSI'),
+	('INV-20260805-3154', NULL, '2026-08-05 10: 13: 53',
+2, 'Ny. Siti Aminah',
+850000, NULL, 'MSI'),
+	('INV-20260805-3513', NULL, '2026-08-05 12: 55: 44', NULL, 'Fiko',
+220000, NULL, 'MSI'),
+	('INV-20260805-4963', NULL, '2026-08-05 10: 50: 14',
+4, 'Ny. Suharti',
+1000000, NULL, 'MSI'),
+	('INV-20260805-5300', NULL, '2026-08-05 13: 51: 42',
+6, 'Tn. Toniman',
+35500000, NULL, 'MSI'),
+	('INV-20260805-6829', NULL, '2026-08-05 13: 32: 17',
+5, 'Ny. Tuti',
+50000000, NULL, 'MSI');
+
+-- Dumping structure for table keuangan.kwitansi_detail_kwitansi
+CREATE TABLE IF NOT EXISTS `kwitansi_detail_kwitansi` (
+  `id_detail` int(11) NOT NULL AUTO_INCREMENT,
+  `no_kwitansi` varchar(20) DEFAULT NULL,
+  `id_barang` int(11) DEFAULT NULL,
+  `jumlah` int(11) NOT NULL,
+  `subtotal` int(11) NOT NULL,
+  PRIMARY KEY (`id_detail`),
+  KEY `idx_kwitansi` (`no_kwitansi`),
+  KEY `idx_barang` (`id_barang`)
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table keuangan.kwitansi_detail_kwitansi: 7 rows
+INSERT INTO `kwitansi_detail_kwitansi` (`id_detail`, `no_kwitansi`, `id_barang`, `jumlah`, `subtotal`) VALUES
+	(1, 'INV-20260723-1598',
+1,
+1,
+85000),
+	(2, 'INV-20260724-1599',
+1,
+1,
+899999999),
+	(3, 'INV-20260731-5593',
+2,
+2,
+491000),
+	(7, 'INV-20260731-5226',
+3,
+4,
+88000),
+	(8, 'INV-20260805-3154',
+1,
+10,
+850000),
+	(9, 'INV-20260805-1547',
+6,
+10,
+1000000),
+	(10, 'INV-20260805-4963',
+6,
+10,
+1000000),
+	(11, 'INV-20260805-3513',
+3,
+10,
+220000),
+	(12, 'INV-20260805-6829',
+7,
+5,
+50000000),
+	(13, 'INV-20260805-5300',
+8,
+1,
+15000000),
+	(14, 'INV-20260805-5300',
+10,
+1,
+500000),
+	(15, 'INV-20260805-5300',
+9,
+1,
+20000000);
+
+-- Dumping structure for table keuangan.kwitansi_inventori
+CREATE TABLE IF NOT EXISTS `kwitansi_inventori` (
+  `id_inventori` int(11) NOT NULL AUTO_INCREMENT,
+  `id_barang` int(11) NOT NULL,
+  `id_user` int(11) NOT NULL,
+  `tanggal` datetime DEFAULT current_timestamp(),
+  `jumlah_perubahan` int(11) NOT NULL,
+  `keterangan` varchar(255) DEFAULT '',
+  PRIMARY KEY (`id_inventori`),
+  KEY `idx_barang` (`id_barang`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table keuangan.kwitansi_inventori: 4 rows
+INSERT INTO `kwitansi_inventori` (`id_inventori`, `id_barang`, `id_user`, `tanggal`, `jumlah_perubahan`, `keterangan`) VALUES
+	(1,
+1,
+1, '2026-07-20 10: 53: 15',
+50, 'Stok Awal Sistem'),
+	(2,
+2,
+1, '2026-07-20 10: 53: 15',
+100, 'Stok Awal Sistem'),
+	(3,
+3,
+1, '2026-07-20 10: 53: 15',
+30, 'Stok Awal Sistem'),
+	(4,
+4,
+1, '2026-07-20 10: 53: 15',
+15, 'Stok Awal Sistem');
+
+-- Dumping structure for table keuangan.kwitansi_kode_barang
+CREATE TABLE IF NOT EXISTS `kwitansi_kode_barang` (
+  `id_barang` int(11) NOT NULL AUTO_INCREMENT,
+  `barcode` varchar(50) DEFAULT NULL,
+  `nama_barang` varchar(150) NOT NULL,
+  `kategori` varchar(50) DEFAULT 'Umum',
+  `harga` int(11) NOT NULL,
+  `stok` int(11) DEFAULT 0,
+  PRIMARY KEY (`id_barang`),
+  UNIQUE KEY `barcode` (`barcode`)
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table keuangan.kwitansi_kode_barang: 6 rows
+INSERT INTO `kwitansi_kode_barang` (`id_barang`, `barcode`, `nama_barang`, `kategori`, `harga`, `stok`) VALUES
+	(1, '899123456001', 'Amoxicillin 500mg (Box)', 'Obat',
+85000,
+38),
+	(2, '899123456002', 'Paracetamol Syrup 60ml', 'Obat',
+18000,
+98),
+	(3, '899123456003', 'Infus Sanbe NaCl 0.9%', 'Alkes',
+22000,
+16),
+	(4, '899123456004', 'Kasa Steril Onemed (Isi 10)', 'Alkes',
+12000,
+15),
+	(5, '899123456005', 'Masker Medis 3-Ply (Box)', 'Alkes',
+35000,
+0),
+	(6, '899123456033', 'Sarung tangan medis (gloves)', 'Alkes',
+100000,
+80),
+	(7, NULL, 'Tabung oksigen dan regulator', 'Umum',
+10000000,
+-5),
+	(8, NULL, 'Defibrilator untuk kejut jantung', 'Umum',
+15000000,
+-1),
+	(9, NULL, 'Meja operasi dan lampu bedah', 'Umum',
+20000000,
+-1),
+	(10, NULL, 'Kateter urin dan kantong urine (urine bag)', 'Umum',
+500000,
+-1),
+	(11, NULL, 'Kateter urin dan kantong urine (urine bag)', 'Alkes',
+500000,
+10);
+
+-- Dumping structure for table keuangan.kwitansi_pelanggan
+CREATE TABLE IF NOT EXISTS `kwitansi_pelanggan` (
+  `id_pelanggan` int(11) NOT NULL AUTO_INCREMENT,
+  `nama_pelanggan` varchar(150) NOT NULL,
+  `no_hp` varchar(20) DEFAULT NULL,
+  `alamat` text DEFAULT NULL,
+  PRIMARY KEY (`id_pelanggan`)
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table keuangan.kwitansi_pelanggan: 3 rows
+INSERT INTO `kwitansi_pelanggan` (`id_pelanggan`, `nama_pelanggan`, `no_hp`, `alamat`) VALUES
+	(1, 'Tn. Budi Santoso', '08123456789', NULL),
+	(2, 'Ny. Siti Aminah', '08987654321', NULL),
+	(4, 'Ny. Suharti', '0877962234', 'Surabaya'),
+	(5, 'Ny. Tuti', '', ''),
+	(6, 'Tn. Toniman', '', '');
+
+-- Dumping structure for table keuangan.kwitansi_user
+CREATE TABLE IF NOT EXISTS `kwitansi_user` (
+  `id_user` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `nama_petugas` varchar(100) NOT NULL,
+  `role` enum('admin','kasir') DEFAULT 'kasir',
+  PRIMARY KEY (`id_user`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table keuangan.kwitansi_user: 2 rows
+INSERT INTO `kwitansi_user` (`id_user`, `username`, `password`, `nama_petugas`, `role`) VALUES
+	(1, 'admin_rkz', '482c811da5d5b4bc6d497ffa98491e38', 'Suster Maria', 'admin'),
+	(2, 'kasir_rkz', 'de28f8f7998f23ab4194b51a6029416f', 'Ahmad Kasir', 'kasir');
+
+-- Dumping structure for table keuangan.kwitansi_user_profile
+CREATE TABLE IF NOT EXISTS `kwitansi_user_profile` (
+  `username` varchar(30) NOT NULL,
+  `password` varchar(50) NOT NULL,
+  `m1` tinyint(1) DEFAULT 1,
+  `m2` tinyint(1) DEFAULT 0,
+  PRIMARY KEY (`username`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table keuangan.kwitansi_user_profile: 7 rows
+INSERT INTO `kwitansi_user_profile` (`username`, `password`, `m1`, `m2`) VALUES
+	('ADMIN', 'ADMIN',
+1,
+0),
+	('DANY', '1277',
+1,
+0),
+	('DIDI', 'DIDI123',
+1,
+1),
+	('FINA', 'MIMI',
+1,
+0),
+	('MITA', 'MITA',
+1,
+0),
+	('MSI', 'MSI123',
+1,
+1),
+	('RERE', 'RERE',
+1,
+0);
+
+/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
+/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
+/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;

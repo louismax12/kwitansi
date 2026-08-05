@@ -23,10 +23,10 @@
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-6 form-group">
+                <!-- <div class="col-md-6 form-group">
                     <label>Nama Pasien (Wajib)</label>
                     <input type="text" name="nama_pasien" id="nama_pasien" class="form-control" required>
-                </div>
+                </div> -->
             </div>
 
             <hr>

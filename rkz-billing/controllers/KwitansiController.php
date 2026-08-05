@@ -40,23 +40,35 @@ class KwitansiController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_pel_post = isset($_POST['id_pelanggan']) ? $_POST['id_pelanggan'] : '';
             $id_pelanggan = null;
+            $nama_pasien = '';
+
             if (!empty($id_pel_post)) {
                 if (is_numeric($id_pel_post)) {
                     $id_pelanggan = intval($id_pel_post);
+                    // Fetch nama_pasien from DB since the user removed the input field
+                    $pelanggan = $this->pelangganModel->getById($id_pelanggan);
+                    if ($pelanggan) {
+                        $nama_pasien = $pelanggan['nama_pelanggan'];
+                    }
                 } else {
                     // New patient tag from Select2
-                    $nama_baru = $id_pel_post;
+                    $nama_pasien = $id_pel_post;
                     $stmt_pel = $this->conn->prepare("INSERT INTO kwitansi_pelanggan (nama_pelanggan, alamat, no_hp) VALUES (?, '', '')");
-                    $stmt_pel->bind_param("s", $nama_baru);
+                    $stmt_pel->bind_param("s", $nama_pasien);
                     if ($stmt_pel->execute()) {
                         $id_pelanggan = $stmt_pel->insert_id;
                     }
                 }
             }
 
+            // Fallback if nama_pasien is still sent via POST
+            if (empty($nama_pasien) && isset($_POST['nama_pasien'])) {
+                $nama_pasien = $_POST['nama_pasien'];
+            }
+
             $data = array(
                 'id_pelanggan' => $id_pelanggan,
-                'nama_pasien' => isset($_POST['nama_pasien']) ? $_POST['nama_pasien'] : '',
+                'nama_pasien' => $nama_pasien,
                 'total_bayar' => 0,
                 'id_user' => isset($_SESSION['username']) ? $_SESSION['username'] : 'Admin',
             );
