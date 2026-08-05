@@ -15,7 +15,7 @@
                 <div class="col-md-6 form-group">
                     <label>Pasien (Pelanggan) Terdaftar</label>
                     <select name="id_pelanggan" class="form-control" id="id_pelanggan">
-                        <option value="">-- Pilih Pasien (Opsional) --</option>
+                        <option value="">-- Pilih atau Ketik Nama Pasien Baru --</option>
                         <?php foreach ($pelangganList as $p): ?>
                             <option value="<?php echo $p['id_pelanggan']; ?>" data-nama="<?php echo htmlspecialchars($p['nama_pelanggan']); ?>">
                                 <?php echo htmlspecialchars($p['nama_pelanggan']); ?>
@@ -45,7 +45,7 @@
                     <tr class="item-row">
                         <td>
                             <select name="items[0][id_barang]" class="form-control item-select" required>
-                                <option value="">-- Pilih --</option>
+                                <option value="">-- Pilih atau Ketik Item --</option>
                                 <?php foreach ($barangList as $b): ?>
                                     <option value="<?php echo $b['id_barang']; ?>" data-harga="<?php echo $b['harga']; ?>">
                                         <?php echo htmlspecialchars($b['nama_barang']); ?> (Stok: <?php echo $b['stok']; ?>)
@@ -53,9 +53,9 @@
                                 <?php endforeach; ?>
                             </select>
                         </td>
-                        <td><input type="text" class="form-control item-price" readonly value="0"></td>
+                        <td><input type="number" name="items[0][harga_baru]" class="form-control item-price" readonly value="0"></td>
                         <td><input type="number" name="items[0][jumlah]" class="form-control item-qty" value="1" min="1" required></td>
-                        <td><input type="text" class="form-control item-subtotal" readonly value="0"></td>
+                        <td><input type="number" class="form-control item-subtotal" readonly value="0"></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-row">&times;</button></td>
                     </tr>
                 </tbody>
@@ -79,15 +79,49 @@
 <script>
 $(document).ready(function() {
     var rowIdx = 1;
-    var barangOptions = `<?php foreach ($barangList as $b): ?><option value="<?php echo $b['id_barang']; ?>" data-harga="<?php echo $b['harga']; ?>"><?php echo htmlspecialchars($b['nama_barang']); ?></option><?php endforeach; ?>`;
+    var barangOptions = `<?php foreach ($barangList as $b): ?><option value="<?php echo $b['id_barang']; ?>" data-harga="<?php echo $b['harga']; ?>"><?php echo htmlspecialchars($b['nama_barang']); ?> (Stok: <?php echo $b['stok']; ?>)</option><?php endforeach; ?>`;
 
-    // Autofill Nama Pasien from Pelanggan
-    $('#id_pelanggan').change(function() {
-        var nama = $(this).find('option:selected').data('nama');
-        if (nama) {
+    // Initialize Select2 for Pelanggan
+    $('#id_pelanggan').select2({
+        tags: true,
+        width: '100%',
+        placeholder: "-- Pilih atau Ketik Nama Pasien Baru --"
+    }).on('select2:select', function(e) {
+        var data = e.params.data;
+        var isNew = data.element ? false : true;
+        if(isNew) {
+            $('#nama_pasien').val(data.text);
+        } else {
+            var nama = $(data.element).data('nama');
             $('#nama_pasien').val(nama);
         }
     });
+
+    // Initialize Select2 for Items
+    function initSelect2(element) {
+        element.select2({
+            tags: true,
+            width: '100%',
+            placeholder: "-- Pilih atau Ketik Item --"
+        }).on('select2:select', function(e) {
+            var isNew = e.params.data.element ? false : true;
+            var row = $(this).closest('tr');
+            var priceInput = row.find('.item-price');
+            
+            if (isNew) {
+                // New tag, unlock price input
+                priceInput.prop('readonly', false).val(0);
+            } else {
+                // Existing tag, lock price and fill from data
+                var price = $(e.params.data.element).data('harga') || 0;
+                priceInput.prop('readonly', true).val(price);
+            }
+            calculateSubtotal(row);
+        });
+    }
+
+    // Initialize first row
+    initSelect2($('.item-select'));
 
     // Add Row
     $('#addRow').click(function() {
@@ -95,16 +129,20 @@ $(document).ready(function() {
             <tr class="item-row">
                 <td>
                     <select name="items[` + rowIdx + `][id_barang]" class="form-control item-select" required>
-                        <option value="">-- Pilih --</option>
+                        <option value="">-- Pilih atau Ketik Item --</option>
                         ` + barangOptions + `
                     </select>
                 </td>
-                <td><input type="text" class="form-control item-price" readonly value="0"></td>
+                <td><input type="number" name="items[` + rowIdx + `][harga_baru]" class="form-control item-price" readonly value="0"></td>
                 <td><input type="number" name="items[` + rowIdx + `][jumlah]" class="form-control item-qty" value="1" min="1" required></td>
-                <td><input type="text" class="form-control item-subtotal" readonly value="0"></td>
+                <td><input type="number" class="form-control item-subtotal" readonly value="0"></td>
                 <td><button type="button" class="btn btn-danger btn-sm remove-row">&times;</button></td>
             </tr>`;
         $('#itemsBody').append(html);
+        
+        // Init Select2 on the new element
+        initSelect2($('#itemsBody').find('.item-select').last());
+        
         rowIdx++;
     });
 
@@ -114,12 +152,9 @@ $(document).ready(function() {
         calculateTotal();
     });
 
-    // On select item
-    $(document).on('change', '.item-select', function() {
-        var price = $(this).find('option:selected').data('harga') || 0;
-        var row = $(this).closest('tr');
-        row.find('.item-price').val(price);
-        calculateSubtotal(row);
+    // On manual price change
+    $(document).on('input', '.item-price', function() {
+        calculateSubtotal($(this).closest('tr'));
     });
 
     // On qty change

@@ -30,9 +30,9 @@
                         <?php foreach ($pelangganList as $p): ?>
                             <tr>
                                 <td><?php echo $p['id_pelanggan']; ?></td>
-                                <td><?php echo htmlspecialchars($p['nama_pelanggan']); ?></td>
-                                <td><?php echo htmlspecialchars($p['no_hp']); ?></td>
-                                <td><?php echo htmlspecialchars($p['alamat']); ?></td>
+                                <td><?php echo htmlspecialchars((string)$p['nama_pelanggan']); ?></td>
+                                <td><?php echo htmlspecialchars((string)$p['no_hp']); ?></td>
+                                <td><?php echo htmlspecialchars((string)$p['alamat']); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>

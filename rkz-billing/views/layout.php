@@ -82,6 +82,7 @@
         /* FontAwesome inclusion (using CDN for icons) */
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
     <div class="wrapper d-flex">
@@ -91,11 +92,17 @@
                 <h4 class="text-primary font-weight-bold mb-0">RKZ Billing</h4>
             </div>
             
-            <?php $current_page = isset($_GET['c']) ? $_GET['c'] : 'dashboard'; ?>
+            <?php 
+                $current_page = isset($_GET['c']) ? $_GET['c'] : 'dashboard'; 
+                $current_action = isset($_GET['a']) ? $_GET['a'] : 'index';
+            ?>
             
             <ul class="list-unstyled components">
                 <li class="<?php echo $current_page == 'dashboard' ? 'active' : ''; ?>">
                     <a href="index.php?c=dashboard"><i class="fas fa-home mr-2"></i> Dashboard</a>
+                </li>
+                <li class="<?php echo ($current_page == 'kwitansi' && $current_action == 'create') ? 'active' : ''; ?>">
+                    <a href="index.php?c=kwitansi&a=create" class="<?php echo ($current_page == 'kwitansi' && $current_action == 'create') ? 'text-green' : 'text-success'; ?>"><i class="fas fa-plus-circle mr-2"></i> Buat Baru</a>
                 </li>
                 <li class="<?php echo $current_page == 'pelanggan' ? 'active' : ''; ?>">
                     <a href="index.php?c=pelanggan"><i class="fas fa-users mr-2"></i> Pelanggan</a>
@@ -103,12 +110,14 @@
                 <li class="<?php echo $current_page == 'barang' ? 'active' : ''; ?>">
                     <a href="index.php?c=barang"><i class="fas fa-box mr-2"></i> Barang/Obat</a>
                 </li>
-                <li class="<?php echo $current_page == 'kwitansi' ? 'active' : ''; ?>">
+                <li class="<?php echo ($current_page == 'kwitansi' && $current_action != 'create') ? 'active' : ''; ?>">
                     <a href="index.php?c=kwitansi&a=history"><i class="fas fa-file-invoice-dollar mr-2"></i> Invoices</a>
                 </li>
-                <li>
-                    <a href="index.php?c=kwitansi&a=create" class="text-success"><i class="fas fa-plus-circle mr-2"></i> Buat Baru</a>
+                <!-- <?php if (isset($_SESSION['m1']) && $_SESSION['m1'] == 1): ?> -->
+                <li class="<?php echo $current_page == 'users' ? 'active' : ''; ?>">
+                    <a href="index.php?c=users"><i class="fas fa-user-cog mr-2"></i> Manajemen Users</a>
                 </li>
+                <?php endif; ?>
             </ul>
         </nav>
 
@@ -127,13 +136,13 @@
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
-                                <i class="fas fa-user-circle fa-lg mr-1 text-primary"></i> <strong>Admin Kasir</strong>
+                                <i class="fas fa-user-circle fa-lg mr-1 text-primary"></i> <strong><?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; ?></strong>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right">
                                 <a class="dropdown-item" href="#">Profile</a>
                                 <a class="dropdown-item" href="#">Settings</a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item text-danger" href="#">Logout</a>
+                                <a class="dropdown-item text-danger" href="index.php?c=auth&a=logout">Logout</a>
                             </div>
                         </li>
                     </ul>
@@ -154,6 +163,7 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <?php if (isset($extra_js)) echo $extra_js; ?>
 </body>
 </html>

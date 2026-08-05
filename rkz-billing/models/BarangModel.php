@@ -9,7 +9,7 @@ class BarangModel {
     }
 
     public function getAll() {
-        $result = $this->conn->query("SELECT * FROM barang ORDER BY nama_barang ASC");
+        $result = $this->conn->query("SELECT * FROM kwitansi_kode_barang ORDER BY nama_barang ASC");
         $data = array();
         if ($result) {
             while ($row = $result->fetch_assoc()) {
@@ -21,7 +21,7 @@ class BarangModel {
 
     public function getById($id) {
         $id_safe = intval($id);
-        $result = $this->conn->query("SELECT * FROM barang WHERE id_barang = $id_safe");
+        $result = $this->conn->query("SELECT * FROM kwitansi_kode_barang WHERE id_barang = $id_safe");
         return $result ? $result->fetch_assoc() : null;
     }
 }

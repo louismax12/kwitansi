@@ -18,7 +18,7 @@ class PelangganController {
             $no_hp = $_POST['no_hp'];
             $alamat = $_POST['alamat'];
 
-            $stmt = $this->conn->prepare("INSERT INTO pelanggan (nama_pelanggan, no_hp, alamat) VALUES (?, ?, ?)");
+            $stmt = $this->conn->prepare("INSERT INTO kwitansi_pelanggan (nama_pelanggan, no_hp, alamat) VALUES (?, ?, ?)");
             $stmt->bind_param("sss", $nama, $no_hp, $alamat);
             if ($stmt->execute()) {
                 header("Location: index.php?c=pelanggan");

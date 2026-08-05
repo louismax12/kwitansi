@@ -24,7 +24,7 @@ class KwitansiController {
     }
 
     public function history() {
-        $stmt = $this->conn->query("SELECT * FROM kwitansi ORDER BY tanggal_transaksi DESC");
+        $stmt = $this->conn->query("SELECT * FROM kwitansi_cetak ORDER BY tanggal_transaksi DESC");
         $history = array();
         if ($stmt) {
             while ($row = $stmt->fetch_assoc()) {
@@ -38,27 +38,62 @@ class KwitansiController {
     public function create() {
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id_pel_post = isset($_POST['id_pelanggan']) ? $_POST['id_pelanggan'] : '';
+            $id_pelanggan = null;
+            if (!empty($id_pel_post)) {
+                if (is_numeric($id_pel_post)) {
+                    $id_pelanggan = intval($id_pel_post);
+                } else {
+                    // New patient tag from Select2
+                    $nama_baru = $id_pel_post;
+                    $stmt_pel = $this->conn->prepare("INSERT INTO kwitansi_pelanggan (nama_pelanggan, alamat, no_hp) VALUES (?, '', '')");
+                    $stmt_pel->bind_param("s", $nama_baru);
+                    if ($stmt_pel->execute()) {
+                        $id_pelanggan = $stmt_pel->insert_id;
+                    }
+                }
+            }
+
             $data = array(
-                'id_pelanggan' => isset($_POST['id_pelanggan']) && !empty($_POST['id_pelanggan']) ? intval($_POST['id_pelanggan']) : null,
+                'id_pelanggan' => $id_pelanggan,
                 'nama_pasien' => isset($_POST['nama_pasien']) ? $_POST['nama_pasien'] : '',
                 'total_bayar' => 0,
-                'id_user' => 1, // Mock user id
+                'id_user' => isset($_SESSION['username']) ? $_SESSION['username'] : 'Admin',
             );
 
             $items = array();
             if (isset($_POST['items']) && is_array($_POST['items'])) {
                 foreach ($_POST['items'] as $item) {
                     if (!empty($item['id_barang']) && !empty($item['jumlah'])) {
-                        $barang = $this->barangModel->getById($item['id_barang']);
-                        if ($barang) {
-                            $subtotal = $barang['harga'] * intval($item['jumlah']);
-                            $data['total_bayar'] += $subtotal;
+                        if (!is_numeric($item['id_barang'])) {
+                            $nama = $item['id_barang'];
+                            $harga = isset($item['harga_baru']) ? intval($item['harga_baru']) : 0;
                             
-                            $items[] = array(
-                                'id_barang' => $item['id_barang'],
-                                'jumlah' => $item['jumlah'],
-                                'subtotal' => $subtotal
-                            );
+                            $stmt = $this->conn->prepare("INSERT INTO kwitansi_kode_barang (nama_barang, harga, stok) VALUES (?, ?, 0)");
+                            $stmt->bind_param("si", $nama, $harga);
+                            if ($stmt->execute()) {
+                                $new_id = $stmt->insert_id;
+                                $subtotal = $harga * intval($item['jumlah']);
+                                $data['total_bayar'] += $subtotal;
+                                
+                                $items[] = array(
+                                    'id_barang' => $new_id,
+                                    'jumlah' => $item['jumlah'],
+                                    'subtotal' => $subtotal
+                                );
+                            }
+                        } else {
+                            $barang = $this->barangModel->getById($item['id_barang']);
+                            if ($barang) {
+                                $subtotal = $barang['harga'] * intval($item['jumlah']);
+                                $data['total_bayar'] += $subtotal;
+                                
+                                $items[] = array(
+                                    'id_barang' => $item['id_barang'],
+                                    'jumlah' => $item['jumlah'],
+                                    'subtotal' => $subtotal
+                                );
+                            }
                         }
                     }
                 }
@@ -92,14 +127,14 @@ class KwitansiController {
 
         $no_kwitansi_safe = $this->conn->real_escape_string($no_kwitansi);
         
-        $res = $this->conn->query("SELECT * FROM kwitansi WHERE no_kwitansi = '$no_kwitansi_safe'");
+        $res = $this->conn->query("SELECT * FROM kwitansi_cetak WHERE no_kwitansi = '$no_kwitansi_safe'");
         $kwitansi = $res ? $res->fetch_assoc() : null;
 
         if (!$kwitansi) {
             die("Kwitansi tidak ditemukan.");
         }
 
-        $resItems = $this->conn->query("SELECT d.*, b.nama_barang, b.harga FROM detail_kwitansi d JOIN barang b ON d.id_barang = b.id_barang WHERE d.no_kwitansi = '$no_kwitansi_safe'");
+        $resItems = $this->conn->query("SELECT d.*, b.nama_barang, b.harga FROM kwitansi_detail_kwitansi d JOIN kwitansi_kode_barang b ON d.id_barang = b.id_barang WHERE d.no_kwitansi = '$no_kwitansi_safe'");
         $items = array();
         if ($resItems) {
             while ($row = $resItems->fetch_assoc()) {
@@ -108,12 +143,8 @@ class KwitansiController {
         }
 
         // Fetch User
-        $id_user = isset($kwitansi['id_user']) ? intval($kwitansi['id_user']) : 1;
-        $resUser = $this->conn->query("SELECT username FROM users LIMIT 1");
-        $kwitansi['nama_user'] = 'Admin';
-        if ($resUser && $rowUser = $resUser->fetch_assoc()) {
-            $kwitansi['nama_user'] = $rowUser['username'];
-        }
+        $id_user = isset($kwitansi['id_user']) ? $kwitansi['id_user'] : 'Admin';
+        $kwitansi['nama_user'] = ($id_user == '1') ? 'ADMIN' : strtoupper($id_user);
 
         $content = __DIR__ . '/../views/kwitansi/view.php';
         require_once __DIR__ . '/../views/layout.php';

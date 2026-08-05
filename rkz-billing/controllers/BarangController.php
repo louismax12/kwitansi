@@ -20,7 +20,7 @@ class BarangController {
             $stok = $_POST['stok'];
             $barcode = empty($_POST['barcode']) ? null : $_POST['barcode'];
 
-            $stmt = $this->conn->prepare("INSERT INTO barang (barcode, nama_barang, kategori, harga, stok) VALUES (?, ?, ?, ?, ?)");
+            $stmt = $this->conn->prepare("INSERT INTO kwitansi_kode_barang (barcode, nama_barang, kategori, harga, stok) VALUES (?, ?, ?, ?, ?)");
             $stmt->bind_param("sssii", $barcode, $nama, $kategori, $harga, $stok);
             if ($stmt->execute()) {
                 header("Location: index.php?c=barang");

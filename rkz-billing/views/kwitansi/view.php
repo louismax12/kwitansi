@@ -5,6 +5,7 @@
 // views/kwitansi/view.php
 // Konversi angka ke terbilang (sederhana)
 function terbilang($x) {
+    $x = abs((int)$x);
     $angka = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
     if ($x < 12) return " " . $angka[$x];
     elseif ($x < 20) return terbilang($x - 10) . " belas";
@@ -104,8 +105,9 @@ $tanggal_indo = date('d', $ts) . ' ' . $bulan_indo[(int)date('m', $ts)] . ' ' . 
             background-color: white;
             margin: 0;
             padding: 0;
-            font-family: 'Arial', Courier, monospace; 
+            font-family: Epson FX-80 Dot Matrix, monospace; /* Menggunakan font Liberation Serif sesuai permintaan */
             font-size: 24px;
+            font-weight: normal; 
             color: #000;
         }
 
@@ -124,50 +126,48 @@ $tanggal_indo = date('d', $ts) . ' ' . $bulan_indo[(int)date('m', $ts)] . ' ' . 
 
         .field-no-kuitansi {
             position: absolute;
-            top: 1.3cm;
-            left: 14.8cm; 
+            top: 1.8cm;
+            left: 15.3cm; 
             width: 6.5cm;
             font-size:23px;
         }
 
         .field-terima-dari {
             position: absolute;
-            top: 6.6cm; 
-            left: -2.3cm; 
+            top: 7.2cm; 
+            left: -2.0cm; 
             width: 17cm;
         }
 
         .field-uang-sejumlah {
             position: absolute;
-            top: 7.8cm; 
-            left: -2.3cm; 
+            top: 8.2cm; 
+            left: -2.0cm; 
             width: 25cm;
             line-height: 0.95; /* Sangat rapat agar jika 2 baris tidak menabrak baris bawahnya */
             font-size: 26px; 
-            font-style: italic;
         }
 
         .field-untuk-pembayaran {
             position: absolute;
-            top: 9.8cm; 
-            left: -2.3cm; 
+            top: 9.2cm; 
+            left: -2.0cm; 
             width: 17cm;
             line-height: 1.5; /* Dipersempit agar kalau 2 baris tidak menabrak bawahnya */
             font-size: 26px; /* Diperkecil agar nominal panjang bisa muat */
-            font-style: italic;
         }
 
         .field-jumlah-rp {
             position: absolute;
-            top: 15.4cm; 
+            top: 15.8cm; 
             left: -2.3cm; 
-            font-size: 27px;
+            font-size: 18pt;
         }
 
         .field-tanggal-surabaya {
             position: absolute;
-            top: 12.6cm; 
-            left: 14.5cm; 
+            top: 13.3cm; 
+            left: 15.3cm; 
         }
 
         .field-nama-user {
