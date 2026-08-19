@@ -3,8 +3,8 @@
 ?>
 <div class="card">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">Riwayat Tagihan (Kwitansi)</h4>
-        <a href="index.php?c=kwitansi&a=create" class="btn btn-primary btn-sm">Buat Tagihan Baru</a>
+        <h4 class="mb-0">Riwayat Kwitansi</h4>
+        <a href="index.php?c=kwitansi&a=create" class="btn btn-primary btn-sm">Buat Kwitansi Baru</a>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -20,7 +20,7 @@
                 </thead>
                 <tbody>
                     <?php if (empty($history)): ?>
-                        <tr><td colspan="5" class="text-center">Belum ada tagihan</td></tr>
+                        <tr><td colspan="5" class="text-center">Belum ada kwitansi</td></tr>
                     <?php else: ?>
                         <?php foreach ($history as $h): ?>
                             <tr>
@@ -30,6 +30,7 @@
                                 <td>Rp <?php echo number_format($h['total_bayar'], 0, ',', '.'); ?></td>
                                 <td>
                                     <a href="index.php?c=kwitansi&a=view&id=<?php echo urlencode($h['no_kwitansi']); ?>" class="btn btn-info btn-sm">Lihat Nota</a>
+                                    <a href="index.php?c=kwitansi&a=edit&id=<?php echo urlencode($h['no_kwitansi']); ?>" class="btn btn-warning btn-sm">Edit</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

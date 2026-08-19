@@ -21,11 +21,12 @@
                         <th>Nama Pelanggan</th>
                         <th>No HP</th>
                         <th>Alamat</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($pelangganList)): ?>
-                        <tr><td colspan="4" class="text-center">Belum ada data pelanggan</td></tr>
+                        <tr><td colspan="5" class="text-center">Belum ada data pelanggan</td></tr>
                     <?php else: ?>
                         <?php foreach ($pelangganList as $p): ?>
                             <tr>
@@ -33,6 +34,10 @@
                                 <td><?php echo htmlspecialchars((string)$p['nama_pelanggan']); ?></td>
                                 <td><?php echo htmlspecialchars((string)$p['no_hp']); ?></td>
                                 <td><?php echo htmlspecialchars((string)$p['alamat']); ?></td>
+                                <td>
+                                    <a href="index.php?c=pelanggan&a=edit&id=<?php echo $p['id_pelanggan']; ?>" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Edit</a>
+                                    <a href="index.php?c=pelanggan&a=delete&id=<?php echo $p['id_pelanggan']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus pelanggan ini?');"><i class="fas fa-trash"></i> Hapus</a>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>

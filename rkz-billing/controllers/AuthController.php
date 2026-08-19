@@ -20,13 +20,22 @@ class AuthController {
             $username = $this->conn->real_escape_string($_POST['username']);
             $password = $_POST['password']; // In plain text
 
-            $res = $this->conn->query("SELECT * FROM kwitansi_user_profile WHERE username = '$username'");
+            // Query ke database HRD (tabel datadasar)
+            // Asumsi: Username yang diinput adalah NIP
+            $res = $this->conn->query("SELECT * FROM hrd.datadasar WHERE NIP = '$username'");
+            
             if ($res && $res->num_rows > 0) {
                 $user = $res->fetch_assoc();
-                if ($user['password'] === $password) {
-                    $_SESSION['username'] = $user['username'];
-                    $_SESSION['m1'] = $user['m1'];
-                    $_SESSION['m2'] = $user['m2'];
+                
+                // Cek password. Kita cek encrypt_pass (MD5) atau password plaintext
+                if ($user['encrypt_pass'] === md5($password) || $user['password'] === $password) {
+                    $_SESSION['username'] = $user['Nama']; // Simpan nama asli sebagai nama user yang tampil
+                    $_SESSION['nip'] = $user['NIP'];
+                    
+                    // Berikan akses penuh secara default karena tidak ada m1/m2 di hrd
+                    $_SESSION['m1'] = 1;
+                    $_SESSION['m2'] = 1;
+                    
                     header('Location: index.php?c=dashboard');
                     exit;
                 } else {

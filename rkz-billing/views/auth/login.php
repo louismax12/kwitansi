@@ -142,22 +142,20 @@
     <div class="login-left d-none d-md-flex">
         <div class="login-left-content">
             <div class="logo-box">
-                <div class="logo-icon">
-                    <i class="fas fa-hospital-symbol text-white"></i>
-                </div>
-                RKZ Billing
+                <img src="img/logo.svg" alt="Logo" style="height: 40px; margin-right: 12px;">
+                RKZ Kwitansi
             </div>
         </div>
         <div class="login-left-content">
             <!-- <h3 class="font-weight-bold">Empowering You to Plan, Track, and Deliver with Clarity</h3> -->
-            <p class="mb-0 text-light" style="opacity: 0.8;">Sistem informasi tagihan terintegrasi untuk efisiensi transaksi Rumah Sakit.</p>
+            <!-- <p class="mb-0 text-light" style="opacity: 0.8;">Sistem informasi tagihan terintegrasi untuk efisiensi transaksi Rumah Sakit.</p> -->
         </div>
     </div>
     
     <!-- Right Side -->
     <div class="login-right">
         <h3>Log In 👋</h3>
-        <p class="text-muted">Log In to Your RKZ Dashboard</p>
+        <p class="text-muted">Log In to Your RKZ Kwitansi</p>
 
         <?php if (!empty($error)): ?>
             <div class="alert alert-danger" style="font-size: 14px; border-radius: 8px; padding: 10px 15px;">
@@ -179,10 +177,10 @@
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="custom-control custom-checkbox">
+                <!-- <div class="custom-control custom-checkbox">
                     <input type="checkbox" class="custom-control-input" id="rememberMe">
                     <label class="custom-control-label text-muted" for="rememberMe" style="font-size: 13px; padding-top: 2px;">Remember Me</label>
-                </div>
+                </div> -->
                 <!-- <a href="#" class="text-dark font-weight-bold" style="font-size: 13px;">Forgot Password?</a> -->
             </div>
 

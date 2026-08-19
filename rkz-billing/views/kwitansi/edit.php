@@ -1,5 +1,5 @@
 <?php
-// views/kwitansi/create.php
+// views/kwitansi/edit.php
 ?>
 <div class="pak-nino-ui">
     <div class="header-bar">
@@ -8,11 +8,11 @@
             St. Vincentius a Paulo<br>
             Jl. Diponegoro 51
         </div>
-        <div class="kwitansi-title">KWITANSI</div>
+        <div class="kwitansi-title">EDIT KWITANSI</div>
         <div class="no-box">
-            <div>No.Kwitansi : <strong style="color:#2d5a8e">Auto</strong></div>
+            <div>No.Kwitansi : <strong style="color:#2d5a8e"><?= htmlspecialchars($kwitansi['no_kwitansi']) ?></strong></div>
             <div style="margin-top:4px">No.Faktur :&nbsp;
-            <input type="text" id="hdr_faktur" value="" readonly>
+            <input type="text" id="hdr_faktur" value="<?= htmlspecialchars($kwitansi['no_faktur']) ?>" readonly>
             </div>
         </div>
     </div>
@@ -21,13 +21,13 @@
         <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="index.php?c=kwitansi&a=create" id="frmKwt" onsubmit="event.preventDefault(); simpan();">
-    <input type="hidden" name="jumlah" id="f_jumlah" value="0">
+    <form method="POST" action="index.php?c=kwitansi&a=edit&id=<?= urlencode($kwitansi['no_kwitansi']) ?>" id="frmKwt" onsubmit="event.preventDefault(); simpan();">
+    <input type="hidden" name="jumlah" id="f_jumlah" value="<?= htmlspecialchars($kwitansi['total_bayar']) ?>">
 
     <div class="form-wrap">
         <div class="form-row">
             <label>Telah Terima Dari :</label>
-            <input type="text" name="nama_pasien" id="f_dari" value="<?= isset($_POST['nama_pasien']) ? htmlspecialchars($_POST['nama_pasien']) : '' ?>" required autofocus>
+            <input type="text" name="nama_pasien" id="f_dari" value="<?= isset($_POST['nama_pasien']) ? htmlspecialchars($_POST['nama_pasien']) : htmlspecialchars($kwitansi['nama_pasien']) ?>" required autofocus>
         </div>
         <div class="form-row">
             <label>Uang Sejumlah :</label>
@@ -35,27 +35,35 @@
         </div>
         <div class="form-row">
             <label>Untuk Pembayaran :</label>
-            <input type="text" name="untuk_pembayaran" id="f_untuk" required value="<?= isset($_POST['untuk_pembayaran']) ? htmlspecialchars($_POST['untuk_pembayaran']) : '' ?>">
+            <input type="text" name="untuk_pembayaran" id="f_untuk" required value="<?= isset($_POST['untuk_pembayaran']) ? htmlspecialchars($_POST['untuk_pembayaran']) : htmlspecialchars($kwitansi['untuk_pembayaran']) ?>">
         </div>
         <div class="form-row">
             <label>Keterangan :</label>
-            <input type="text" name="keterangan" id="f_ket" required value="<?= isset($_POST['keterangan']) ? htmlspecialchars($_POST['keterangan']) : '' ?>">
+            <input type="text" name="keterangan" id="f_ket" required value="<?= isset($_POST['keterangan']) ? htmlspecialchars($_POST['keterangan']) : htmlspecialchars($kwitansi['keterangan']) ?>">
         </div>
         <div class="form-row">
             <label></label>
-            <input type="text" name="no_faktur" id="f_faktur" placeholder="No. Faktur" value="<?= isset($_POST['no_faktur']) ? htmlspecialchars($_POST['no_faktur']) : '' ?>" required oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+            <input type="text" name="no_faktur" id="f_faktur" placeholder="No. Faktur" value="<?= isset($_POST['no_faktur']) ? htmlspecialchars($_POST['no_faktur']) : htmlspecialchars($kwitansi['no_faktur']) ?>" required oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
             <label style="width:auto;margin-left:20px">Jumlah : Rp.</label>
             <input type="text" id="disp_jumlah"
-                value=""
+                value="<?= number_format($kwitansi['total_bayar'], 0, ',', '.') ?>"
                 style="width:160px;font-weight:700;color:#1a3d6e;background:#fff;border:1px solid #aaa;padding:4px 6px;border-radius:2px"
                 placeholder="0"
                 oninput="this.value=this.value.replace(/[^0-9.,]/g,'')">
             &nbsp;
-            <label><input type="checkbox" id="chkDetail"> Detail</label>
+            <?php 
+                $hasDetails = false;
+                if (!empty($existingItems)) {
+                    if (count($existingItems) > 1 || $existingItems[0]['id_barang'] !== null) {
+                        $hasDetails = true;
+                    }
+                }
+            ?>
+            <label><input type="checkbox" id="chkDetail" <?= $hasDetails ? 'checked' : '' ?>> Detail</label>
         </div>
     </div>
 
-    <div class="detail-section" id="detailBox">
+    <div class="detail-section <?= $hasDetails ? 'open' : '' ?>" id="detailBox">
         <strong style="color:#1a3d6e">Detail Pembayaran</strong>
         <table class="det-tbl" style="margin-top:8px">
             <thead>
@@ -68,21 +76,41 @@
                 </tr>
             </thead>
             <tbody id="detBody">
-                <tr>
-                    <td>1</td>
-                    <td>
-                        <input type="hidden" name="det_kd[]" value="<?php echo !empty($barangList) ? $barangList[0]['id_barang'] : ''; ?>">
-                        <select onchange="updateKdBrg(this)" style="width:100%">
-                            <option value="">- Pilih Kategori -</option>
-                            <?php foreach ($barangList as $b): ?>
-                                <option value="<?= $b['id_barang'] ?>"><?= htmlspecialchars($b['nama_barang']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                    <td><input type="text" name="det_nama[]" class="det-nama" placeholder="Nama detail (wajib)" value="" oninput="clearNamaError(this)"></td>
-                    <td class="amt"><input type="text" name="det_jml[]" class="det-jml" value="0" style="text-align:right" onchange="recalc()"></td>
-                    <td><button type="button" class="btn btn-delete" onclick="delRow(this)">X</button></td>
-                </tr>
+                <?php if (!empty($existingItems)): ?>
+                    <?php foreach ($existingItems as $idx => $eItem): ?>
+                    <tr>
+                        <td><?= $idx + 1 ?></td>
+                        <td>
+                            <input type="hidden" name="det_kd[]" value="<?= htmlspecialchars($eItem['id_barang']) ?>">
+                            <select onchange="updateKdBrg(this)" style="width:100%">
+                                <option value="">- Pilih Kategori -</option>
+                                <?php foreach ($barangList as $b): ?>
+                                    <option value="<?= $b['id_barang'] ?>" <?= ($b['id_barang'] == $eItem['id_barang']) ? 'selected' : '' ?>><?= htmlspecialchars($b['nama_barang']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td><input type="text" name="det_nama[]" class="det-nama" placeholder="Nama detail (wajib)" value="<?= htmlspecialchars($eItem['nama_detail']) ?>" oninput="clearNamaError(this)"></td>
+                        <td class="amt"><input type="text" name="det_jml[]" class="det-jml" value="<?= number_format($eItem['subtotal'], 0, '', '') ?>" style="text-align:right" onchange="recalc()"></td>
+                        <td><button type="button" class="btn btn-delete" onclick="delRow(this)">X</button></td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td>1</td>
+                        <td>
+                            <input type="hidden" name="det_kd[]" value="">
+                            <select onchange="updateKdBrg(this)" style="width:100%">
+                                <option value="">- Pilih Kategori -</option>
+                                <?php foreach ($barangList as $b): ?>
+                                    <option value="<?= $b['id_barang'] ?>"><?= htmlspecialchars($b['nama_barang']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td><input type="text" name="det_nama[]" class="det-nama" placeholder="Nama detail (wajib)" value="" oninput="clearNamaError(this)"></td>
+                        <td class="amt"><input type="text" name="det_jml[]" class="det-jml" value="0" style="text-align:right" onchange="recalc()"></td>
+                        <td><button type="button" class="btn btn-delete" onclick="delRow(this)">X</button></td>
+                    </tr>
+                <?php endif; ?>
             </tbody>
         </table>
         <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
@@ -216,6 +244,14 @@ function toggleDetail(checked) {
 
 document.getElementById('chkDetail')?.addEventListener('change', function() {
     toggleDetail(this.checked);
+});
+
+window.addEventListener('load', function() {
+    const chk = document.getElementById('chkDetail');
+    if (chk) {
+        toggleDetail(chk.checked);
+    }
+    toggleSimpan();
 });
 
 document.getElementById('disp_jumlah')?.addEventListener('change', function() {

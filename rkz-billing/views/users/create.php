@@ -23,19 +23,7 @@
                 </div>
             </div>
 
-            <div class="form-group row">
-                <label class="col-sm-3 col-form-label font-weight-bold">Hak Akses</label>
-                <div class="col-sm-9">
-                    <div class="custom-control custom-checkbox mb-2">
-                        <input type="checkbox" class="custom-control-input" id="m1Check" name="m1" value="1">
-                        <label class="custom-control-label" for="m1Check">M1 (Akses Admin / Manajemen User)</label>
-                    </div>
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="m2Check" name="m2" value="1">
-                        <label class="custom-control-label" for="m2Check">M2 (Akses Tambahan)</label>
-                    </div>
-                </div>
-            </div>
+            <!-- Hak akses m1 dan m2 dihapus sesuai permintaan -->
 
             <hr>
             <div class="form-group row mb-0">

@@ -20,9 +20,13 @@ class KwitansiModel {
         $total_bayar = $data['total_bayar'];
         $id_user = $data['id_user'];
 
+        $no_faktur = isset($data['no_faktur']) ? $data['no_faktur'] : '';
+        $untuk_pembayaran = isset($data['untuk_pembayaran']) ? $data['untuk_pembayaran'] : '';
+        $keterangan = isset($data['keterangan']) ? $data['keterangan'] : '';
+
         // 1. Insert Header
-        $stmt = $this->conn->prepare("INSERT INTO kwitansi_cetak (no_kwitansi, tanggal_transaksi, id_pelanggan, nama_pasien, total_bayar, id_user) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssisis", $no_kwitansi, $tanggal, $id_pelanggan, $nama_pasien, $total_bayar, $id_user);
+        $stmt = $this->conn->prepare("INSERT INTO kwitansi_cetak (no_kwitansi, tanggal_transaksi, id_pelanggan, nama_pasien, total_bayar, id_user, no_faktur, untuk_pembayaran, keterangan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssisissss", $no_kwitansi, $tanggal, $id_pelanggan, $nama_pasien, $total_bayar, $id_user, $no_faktur, $untuk_pembayaran, $keterangan);
         
         if (!$stmt->execute()) {
             return false;
@@ -34,18 +38,18 @@ class KwitansiModel {
         $decrementedStock = array();
         
         foreach ($items as $item) {
-            $stmt_item = $this->conn->prepare("INSERT INTO kwitansi_detail_kwitansi (no_kwitansi, id_barang, jumlah, subtotal) VALUES (?, ?, ?, ?)");
-            $stmt_item->bind_param("siii", $no_kwitansi, $item['id_barang'], $item['jumlah'], $item['subtotal']);
+            $stmt_item = $this->conn->prepare("INSERT INTO kwitansi_detail_kwitansi (no_kwitansi, id_barang, nama_detail, jumlah, subtotal) VALUES (?, ?, ?, ?, ?)");
+            $stmt_item->bind_param("sisii", $no_kwitansi, $item['id_barang'], $item['nama_detail'], $item['jumlah'], $item['subtotal']);
             
             if ($stmt_item->execute()) {
                 $insertedItems[] = $stmt_item->insert_id;
                 
-                // Kurangi stok barang
-                $stmt_stok = $this->conn->prepare("UPDATE kwitansi_kode_barang SET stok = stok - ? WHERE id_barang = ?");
-                $stmt_stok->bind_param("ii", $item['jumlah'], $item['id_barang']);
-                if ($stmt_stok->execute()) {
-                    $decrementedStock[] = array('id_barang' => $item['id_barang'], 'jumlah' => $item['jumlah']);
-                }
+                // Kurangi stok barang (tidak ada kolom stok di kwitansi_brg)
+                // $stmt_stok = $this->conn->prepare("UPDATE kwitansi_kode_barang SET stok = stok - ? WHERE id_barang = ?");
+                // $stmt_stok->bind_param("ii", $item['jumlah'], $item['id_barang']);
+                // if ($stmt_stok->execute()) {
+                //     $decrementedStock[] = array('id_barang' => $item['id_barang'], 'jumlah' => $item['jumlah']);
+                // }
             } else {
                 $hasError = true;
                 break;
@@ -55,11 +59,11 @@ class KwitansiModel {
         // 3. Manual Rollback if Error
         if ($hasError) {
             // Rollback stok barang
-            foreach ($decrementedStock as $ds) {
-                $stmt_restok = $this->conn->prepare("UPDATE kwitansi_kode_barang SET stok = stok + ? WHERE id_barang = ?");
-                $stmt_restok->bind_param("ii", $ds['jumlah'], $ds['id_barang']);
-                $stmt_restok->execute();
-            }
+            // foreach ($decrementedStock as $ds) {
+            //     $stmt_restok = $this->conn->prepare("UPDATE kwitansi_kode_barang SET stok = stok + ? WHERE id_barang = ?");
+            //     $stmt_restok->bind_param("ii", $ds['jumlah'], $ds['id_barang']);
+            //     $stmt_restok->execute();
+            // }
             // Rollback details
             foreach ($insertedItems as $id_detail) {
                 $this->conn->query("DELETE FROM kwitansi_detail_kwitansi WHERE id_detail = " . intval($id_detail));
@@ -78,5 +82,45 @@ class KwitansiModel {
     private function generateInvoiceNumber() {
         // Simple generation logic: INV-YYYYMMDD-Random
         return 'INV-' . date('Ymd') . '-' . rand(1000, 9999);
+    }
+
+    public function updateInvoice($no_kwitansi, $data, $items) {
+        $id_pelanggan = isset($data['id_pelanggan']) ? $data['id_pelanggan'] : null;
+        $nama_pasien = $data['nama_pasien'];
+        $total_bayar = $data['total_bayar'];
+        $no_faktur = isset($data['no_faktur']) ? $data['no_faktur'] : '';
+        $untuk_pembayaran = isset($data['untuk_pembayaran']) ? $data['untuk_pembayaran'] : '';
+        $keterangan = isset($data['keterangan']) ? $data['keterangan'] : '';
+
+        // Update header
+        $stmt = $this->conn->prepare("UPDATE kwitansi_cetak SET id_pelanggan = ?, nama_pasien = ?, total_bayar = ?, no_faktur = ?, untuk_pembayaran = ?, keterangan = ? WHERE no_kwitansi = ?");
+        $stmt->bind_param("isissss", $id_pelanggan, $nama_pasien, $total_bayar, $no_faktur, $untuk_pembayaran, $keterangan, $no_kwitansi);
+        
+        if (!$stmt->execute()) {
+            return false;
+        }
+
+        // Delete old items
+        $stmt_del = $this->conn->prepare("DELETE FROM kwitansi_detail_kwitansi WHERE no_kwitansi = ?");
+        $stmt_del->bind_param("s", $no_kwitansi);
+        $stmt_del->execute();
+
+        // Insert new items
+        $hasError = false;
+        foreach ($items as $item) {
+            $stmt_item = $this->conn->prepare("INSERT INTO kwitansi_detail_kwitansi (no_kwitansi, id_barang, nama_detail, jumlah, subtotal) VALUES (?, ?, ?, ?, ?)");
+            $stmt_item->bind_param("sisii", $no_kwitansi, $item['id_barang'], $item['nama_detail'], $item['jumlah'], $item['subtotal']);
+            if (!$stmt_item->execute()) {
+                $hasError = true;
+                break;
+            }
+        }
+
+        if ($hasError) {
+            // Error handling could be more robust, but following existing patterns
+            return false;
+        }
+
+        return true;
     }
 }

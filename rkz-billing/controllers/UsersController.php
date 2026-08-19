@@ -27,8 +27,8 @@ class UsersController {
             $data = [
                 'username' => $_POST['username'],
                 'password' => $_POST['password'],
-                'm1' => isset($_POST['m1']) ? 1 : 0,
-                'm2' => isset($_POST['m2']) ? 1 : 0
+                'm1' => 0, // Default no admin access
+                'm2' => 0  // Default no additional access
             ];
             
             // Check if username exists

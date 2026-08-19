@@ -24,4 +24,16 @@ class PelangganModel {
         $result = $this->conn->query("SELECT * FROM kwitansi_pelanggan WHERE id_pelanggan = $id_safe");
         return $result ? $result->fetch_assoc() : null;
     }
+
+    public function update($id, $nama, $no_hp, $alamat) {
+        $stmt = $this->conn->prepare("UPDATE kwitansi_pelanggan SET nama_pelanggan = ?, no_hp = ?, alamat = ? WHERE id_pelanggan = ?");
+        $stmt->bind_param("sssi", $nama, $no_hp, $alamat, $id);
+        return $stmt->execute();
+    }
+
+    public function delete($id) {
+        $stmt = $this->conn->prepare("DELETE FROM kwitansi_pelanggan WHERE id_pelanggan = ?");
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
+    }
 }

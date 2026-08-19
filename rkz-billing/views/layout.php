@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RKZ Billing System</title>
+    <title>RKZ Kwitansi System</title>
     <!-- Bootstrap 4 murni -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <!-- FontAwesome -->
@@ -99,6 +99,12 @@
             background: #f4f7fe;
             border: 1px solid #4318FF;
             font-weight: 700;
+        }
+        
+        #sidebar ul.collapse li a {
+            padding-left: 50px;
+            font-size: 14px;
+            margin-top: 5px;
         }
 
         /* Page Content Styles */
@@ -279,7 +285,7 @@
                     <img src="img/logo.svg" alt="Logo RKZ" class="brand-logo-img" style="height: 40px; width: auto; max-width: 100%;">
                 </div>
                 <div class="d-flex flex-column justify-content-center">
-                    <h4 class="mb-0" style="color: #e4e5eb; font-weight: 700; line-height: 1;">RKZ Billing</h4>
+                    <h4 class="mb-0" style="color: #e4e5eb; font-weight: 700; line-height: 1;">RKZ Kwitansi</h4>
                     <h6 class="mb-0 mt-1" style="color: rgba(228, 229, 235, 0.7); font-size: 11px; letter-spacing: 0.5px;">Sistem Informasi Kwitansi</h6>
                 </div>
             </div>
@@ -291,38 +297,50 @@
                 // Map page to title
                 $page_titles = [
                     'dashboard' => 'Dashboard',
-                    'kwitansi' => ($current_action == 'create') ? 'Buat Tagihan Baru' : 'Invoices',
+                    'kwitansi' => ($current_action == 'create') ? 'Buat Tagihan Baru' : 'Kwitansi',
                     'pelanggan' => 'Client Management',
-                    'barang' => 'Master Barang',
+                    'barang' => 'Master Kategori',
                     'users' => 'Settings'
                 ];
                 $page_title = isset($page_titles[$current_page]) ? $page_titles[$current_page] : 'RKZ Billing';
             ?>
             
             <ul class="list-unstyled components">
-                <li class="<?php echo $current_page == 'dashboard' ? 'active' : ''; ?>">
+                <!-- <li class="<?php echo $current_page == 'dashboard' ? 'active' : ''; ?>">
                     <a href="index.php?c=dashboard"><i class="fas fa-home"></i> Dashboard</a>
-                </li>
+                </li> -->
                 <li class="<?php echo ($current_page == 'kwitansi' && $current_action == 'create') ? 'active' : ''; ?>">
-                    <a href="index.php?c=kwitansi&a=create"><i class="fas fa-file-invoice"></i> Buat Invoice</a>
-                </li>
-                <li class="<?php echo $current_page == 'pelanggan' ? 'active' : ''; ?>">
-                    <a href="index.php?c=pelanggan"><i class="fas fa-users"></i> Client Management</a>
+                    <a href="index.php?c=kwitansi&a=create"><i class="fas fa-file-invoice"></i> Buat Kwitansi</a>
                 </li>
                 <li class="<?php echo $current_page == 'barang' ? 'active' : ''; ?>">
-                    <a href="index.php?c=barang"><i class="fas fa-box"></i> Barang/Obat</a>
+                    <a href="index.php?c=barang"><i class="fas fa-box"></i> Master Kategori</a>
                 </li>
                 <li class="<?php echo ($current_page == 'kwitansi' && $current_action != 'create') ? 'active' : ''; ?>">
-                    <a href="index.php?c=kwitansi&a=history"><i class="fas fa-file-invoice-dollar"></i> Invoices</a>
+                    <a href="index.php?c=kwitansi&a=history"><i class="fas fa-file-invoice-dollar"></i> Kwitansi</a>
                 </li>
-                <!-- <?php if (isset($_SESSION['m1']) && $_SESSION['m1'] == 1): ?> -->
-                <li class="<?php echo $current_page == 'users' ? 'active' : ''; ?>">
-                    <a href="index.php?c=users"><i class="fas fa-cog"></i> Settings</a>
+                
+                <?php 
+                    $is_additional_active = in_array($current_page, ['pelanggan', 'users']);
+                ?>
+                <li class="<?php echo $is_additional_active ? 'active' : ''; ?>">
+                    <a href="#additionalSubmenu" data-toggle="collapse" aria-expanded="<?php echo $is_additional_active ? 'true' : 'false'; ?>" class="dropdown-toggle">
+                        <i class="fas fa-folder-plus"></i> Additional
+                    </a>
+                    <ul class="collapse list-unstyled <?php echo $is_additional_active ? 'show' : ''; ?>" id="additionalSubmenu">
+                        <li class="<?php echo $current_page == 'pelanggan' ? 'active' : ''; ?>">
+                            <a href="index.php?c=pelanggan"><i class="fas fa-users"></i> Client Management</a>
+                        </li>
+                        <?php if (isset($_SESSION['m1']) && $_SESSION['m1'] == 1): ?>
+                        <!-- <li class="<?php echo $current_page == 'users' ? 'active' : ''; ?>">
+                            <a href="index.php?c=users"><i class="fas fa-cog"></i> Settings</a>
+                        </li> -->
+                        <?php endif; ?>
+                    </ul>
                 </li>
-                <li class="<?php echo $current_page == 'users' ? 'active' : ''; ?>">
+                
+                <li>
                     <a class="text-danger" href="index.php?c=auth&a=logout"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
                 </li>
-                <?php endif; ?>
             </ul>
         </nav>
 
@@ -338,21 +356,56 @@
                     <h2 class="page-title d-none d-md-block"><?php echo $page_title; ?></h2>
                     
                     <ul class="nav navbar-nav ml-auto flex-row align-items-center">
-                        <li class="nav-item">
-                            <a class="nav-icon-btn" href="#">
+                        <li class="nav-item dropdown">
+                            <a class="nav-icon-btn dropdown-toggle" href="#" id="notifDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="text-decoration: none;">
                                 <i class="far fa-bell"></i>
-                                <span class="badge-dot"></span>
+                                <?php
+                                global $conn;
+                                $notifs = [];
+                                if (isset($conn)) {
+                                    $res_notif = $conn->query("SELECT * FROM kwitansi_cetak ORDER BY tanggal_transaksi DESC LIMIT 5");
+                                    if ($res_notif) {
+                                        while ($rn = $res_notif->fetch_assoc()) {
+                                            $notifs[] = $rn;
+                                        }
+                                    }
+                                }
+                                if (count($notifs) > 0): ?>
+                                    <span class="badge-dot"></span>
+                                <?php endif; ?>
                             </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow-sm border-0 mt-2 p-0" aria-labelledby="notifDropdown" style="min-width: 250px;">
+                                <div class="p-3 bg-light border-bottom">
+                                    <h6 class="mb-0 font-weight-bold text-primary">Notifikasi Baru</h6>
+                                </div>
+                                <?php if (count($notifs) > 0): ?>
+                                    <div class="list-group list-group-flush">
+                                        <?php foreach($notifs as $n): ?>
+                                            <a href="index.php?c=kwitansi&a=view&id=<?= urlencode($n['no_kwitansi']) ?>" class="list-group-item list-group-item-action p-3">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h6 class="mb-1 text-primary" style="font-size: 0.9rem;">Kwitansi <?= htmlspecialchars($n['no_kwitansi']) ?></h6>
+                                                    <small class="text-muted"><?= date('d/m H:i', strtotime($n['tanggal_transaksi'])) ?></small>
+                                                </div>
+                                                <p class="mb-1 small">Tagihan untuk <strong><?= htmlspecialchars($n['nama_pasien']) ?></strong></p>
+                                                <small class="text-muted">Dibuat oleh: <?= htmlspecialchars($n['id_user']) ?></small>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="p-3 text-center text-muted small">
+                                        <i class="fas fa-check-circle text-success mr-1"></i> Belum ada aktivitas kwitansi terbaru.
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </li>
                         <li class="nav-item dropdown ml-3">
-                            <a class="user-profile dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+                            <a class="user-profile dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="text-decoration: none;">
                                 <div class="user-avatar">
                                     <i class="fas fa-user"></i>
                                 </div>
                                 <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Admin'; ?>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-right shadow-sm border-0 mt-2">
-                                <a class="dropdown-item" href="#"><i class="fas fa-user-circle mr-2 text-muted"></i> Profile</a>
+                            <div class="dropdown-menu dropdown-menu-right border-0 shadow-sm rounded-lg" aria-labelledby="navbarDropdown">
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item text-danger" href="index.php?c=auth&a=logout"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
                             </div>

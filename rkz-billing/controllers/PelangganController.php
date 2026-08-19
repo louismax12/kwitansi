@@ -30,4 +30,35 @@ class PelangganController {
         $content = __DIR__ . '/../views/pelanggan/index.php';
         require_once __DIR__ . '/../views/layout.php';
     }
+
+    public function edit() {
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nama = $_POST['nama_pelanggan'];
+            $no_hp = $_POST['no_hp'];
+            $alamat = $_POST['alamat'];
+            
+            if ($this->pelangganModel->update($id, $nama, $no_hp, $alamat)) {
+                header("Location: index.php?c=pelanggan");
+                exit;
+            }
+        }
+        
+        $p = $this->pelangganModel->getById($id);
+        if (!$p) {
+            die("Pelanggan tidak ditemukan.");
+        }
+        
+        $content = __DIR__ . '/../views/pelanggan/edit.php';
+        require_once __DIR__ . '/../views/layout.php';
+    }
+
+    public function delete() {
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if ($id > 0) {
+            $this->pelangganModel->delete($id);
+        }
+        header("Location: index.php?c=pelanggan");
+        exit;
+    }
 }

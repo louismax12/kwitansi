@@ -67,19 +67,23 @@ $tanggal_indo = date('d', $ts) . ' ' . $bulan_indo[(int)date('m', $ts)] . ' ' . 
     <div class="field-uang-sejumlah"><?php echo $terbilang_rupiah; ?></div>
     
     <div class="field-untuk-pembayaran">
-        Biaya Perawatan / Tindakan Medis<br>
+        <?php echo nl2br(htmlspecialchars($kwitansi['untuk_pembayaran'])); ?><br>
         <?php 
-        // Tampilkan maks 2 item pertama sebagai referensi
+        // Tampilkan maks 2 item pertama sebagai referensi tambahan (opsional)
         $item_names = array();
         for($i = 0; $i < min(2, count($items)); $i++) {
             $item_names[] = $items[$i]['nama_barang'];
         }
-        echo htmlspecialchars(implode(', ', $item_names));
-        if(count($items) > 2) echo " ...dll";
+        $detail_text = implode(', ', $item_names);
+        if(count($items) > 2) $detail_text .= " ...dll";
+        
+        if (!empty($detail_text) && $detail_text !== $kwitansi['untuk_pembayaran']) {
+            echo htmlspecialchars($detail_text);
+        }
         ?>
     </div>
     
-    <div class="field-jumlah-rp">Rp <?php echo number_format($kwitansi['total_bayar'], 0, ',', '.'); ?>,-</div>
+    <div class="field-jumlah-rp"> <?php echo number_format($kwitansi['total_bayar'], 0, ',', '.'); ?>,-</div>
     <div class="field-tanggal-surabaya"><?php echo $tanggal_indo; ?></div>
     <div class="field-nama-user">(<?php echo htmlspecialchars($kwitansi['nama_user']); ?>)</div>
 </div>
@@ -127,7 +131,7 @@ $tanggal_indo = date('d', $ts) . ' ' . $bulan_indo[(int)date('m', $ts)] . ' ' . 
         .field-no-kuitansi {
             position: absolute;
             top: 1.8cm;
-            left: 15.3cm; 
+            left: 23.0cm; /* Menambahkan 4cm lagi menjadi 23.0cm */
             width: 6.5cm;
             font-size:23px;
         }
@@ -135,45 +139,49 @@ $tanggal_indo = date('d', $ts) . ' ' . $bulan_indo[(int)date('m', $ts)] . ' ' . 
         .field-terima-dari {
             position: absolute;
             top: 7.2cm; 
-            left: -2.0cm; 
-            width: 17cm;
+            left: 6.0cm; 
+            width: 14cm; /* Dipersempit agar tidak menabrak batas kanan */
         }
 
         .field-uang-sejumlah {
             position: absolute;
             top: 8.2cm; 
-            left: -2.0cm; 
-            width: 25cm;
-            line-height: 0.95; /* Sangat rapat agar jika 2 baris tidak menabrak baris bawahnya */
+            left: 6.0cm; 
+            width: 14cm;
+            line-height: 0.95; 
             font-size: 26px; 
         }
 
         .field-untuk-pembayaran {
             position: absolute;
             top: 9.2cm; 
-            left: -2.0cm; 
-            width: 17cm;
-            line-height: 1.5; /* Dipersempit agar kalau 2 baris tidak menabrak bawahnya */
-            font-size: 26px; /* Diperkecil agar nominal panjang bisa muat */
+            left: 6.0cm; 
+            width: 14cm;
+            line-height: 1.5; 
+            font-size: 26px; 
         }
 
         .field-jumlah-rp {
             position: absolute;
             top: 15.8cm; 
-            left: -2.3cm; 
+            left: 4.7cm; 
             font-size: 18pt;
         }
 
         .field-tanggal-surabaya {
             position: absolute;
             top: 13.3cm; 
-            left: 15.3cm; 
+            left: 23.0cm; /* Menambahkan 4cm lagi menjadi 23.0cm */
+            width: 6cm;
+            white-space: nowrap; /* Mencegah teks tanggal turun ke bawah */
         }
 
         .field-nama-user {
             position: absolute;
             top: 16.6cm; 
-            left: 14.5cm; 
+            left: 23.0cm; /* Menambahkan 4cm lagi menjadi 23.0cm */
+            width: 6cm;
+            text-align: center;
         }
     }
 </style>
